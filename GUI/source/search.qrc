@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="search">
+    <file>src.png</file>
+  </qresource>
+  <qresource prefix="settings">
+    <file>settings.png</file>
+  </qresource>
+</RCC>
