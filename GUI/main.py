@@ -14,10 +14,16 @@ from PySide2 import QtGui, QtCore
 class MainWindow(QMainWindow, design.Ui_MainWindow):
     tabs = 1
 
+    width = 0
+    height = 0
+
     def __init__(self):
 
         super().__init__()
         self.setupUi(self)
+
+        self.width = self.geometry().width()
+        self.height = self.geometry().height()
 
         # noinspection PyArgumentList
         self.setGeometry(QtCore.QRect((QApplication.desktop().width() - self.geometry().width()) / 2, 40, self.geometry().width(), self.geometry().height()))
@@ -65,7 +71,6 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.label.setText('Input URL:')
-
         # noinspection PyArgumentList
         self.address = QLineEdit(self.centralwidget)
         self.view = QGraphicsView(self.centralwidget)
@@ -74,13 +79,17 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
 
         self.count.setText(str(self.tabs))
 
+        # BUTTONS
         # noinspection PyUnresolvedReferences
         self.search.clicked.connect(self.searcher)
         self.settings_button.clicked.connect(self.settings)
 
-        # animations
+        # ANIMATIONS
         self.anim_label = QtCore.QPropertyAnimation(self.label, b'pos')
         self.anim_settings = QtCore.QPropertyAnimation(self.settings_button, b'pos')
+        self.anim_hLW = QtCore.QPropertyAnimation(self.horizontalLayoutWidget, b'size')
+        self.anim_url = QtCore.QPropertyAnimation(self.url, b'pos')
+        self.anim_search = QtCore.QPropertyAnimation(self.search, b'pos')
 
         self.show()
 
@@ -129,49 +138,60 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
         pass
 
     def resizeEvent(self, event):
-        ratio = self.width() / self.height()
-        # print(width / height)
-        if self.width() == 1024 and self.height()== 650:
-            # noinspection PyArgumentList
-            self.anim_label.setStartValue(QtCore.QPoint(self.label.pos()))
-            self.anim_label.setEndValue(QtCore.QPoint(437, 83))
-            self.anim_label.setDuration(1000)
-            self.anim_label.setEasingCurve(QtCore.QEasingCurve.Linear)
-            self.anim_label.start()
-            # noinspection PyArgumentList
-            self.anim_settings.setStartValue(self.settings_button.pos())
-            self.anim_settings.setEndValue(QtCore.QPoint(971, -1))
-            self.anim_settings.setDuration(1000)
-            self.anim_settings.setEasingCurve(QtCore.QEasingCurve.InOutQuad)
-            self.anim_settings.start()
-            # noinspection PyArgumentList
-            self.horizontalLayoutWidget.setGeometry(QtCore.QRect(50, 0, 921, 51))
-            # noinspection PyArgumentList
-            self.url.setGeometry(QtCore.QRect(182, 150, 660, 40))
-            # noinspection PyArgumentList
-            self.search.setGeometry(QtCore.QRect(847, 142, 53, 53))
-        elif 1.4 <= ratio <= 1.5:
-            pass
-        elif 1.3 <= ratio <= 1.35:
-            # noinspection PyArgumentList
-            self.anim_label.setStartValue(QtCore.QPoint(437, 83))
-            self.anim_label.setEndValue(QtCore.QPoint(347, 83))
-            self.anim_label.setDuration(1000)
-            self.anim_label.setEasingCurve(QtCore.QEasingCurve.Linear)
-            self.anim_label.start()
-            # noinspection PyArgumentList
-            self.anim_settings.setStartValue(QtCore.QPoint(971, -1))
-            self.anim_settings.setEndValue(QtCore.QPoint(792, -1))
-            self.anim_settings.setDuration(1000)
-            self.anim_settings.setEasingCurve(QtCore.QEasingCurve.InOutQuad)
-            self.anim_settings.start()
-            # noinspection PyArgumentList
-            self.horizontalLayout.setGeometry(QtCore.QRect(50, 0, 742, 51))
-            # noinspection PyArgumentList
-            self.url.setGeometry(QtCore.QRect(92.5, 150, 660, 40))
-            # noinspection PyArgumentList
-            self.search.setGeometry(QtCore.QRect(759, 142, 53, 53))
-            # self.setGeometry(QtCore.QRect((QApplication.desktop().width() - 845) // 2, 40, 845, 650))
+        # horizontal layout widget animation
+        height = self.horizontalLayoutWidget.geometry().height()
+        self.anim_hLW.setStartValue(QtCore.QSize(
+            self.horizontalLayoutWidget.geometry().width(),     # width
+            height)    # height
+        )
+        self.anim_hLW.setEndValue(QtCore.QSize(
+            self.geometry().width() - 103,                      # new width
+            height)    # height
+        )
+        self.anim_hLW.setDuration(1)
+        self.anim_hLW.setEasingCurve(QtCore.QEasingCurve.Linear)
+        self.anim_hLW.start()
+
+        # settings button animation
+        self.anim_settings.setStartValue(self.settings_button.pos())
+        self.anim_settings.setEndValue(QtCore.QPoint(
+            self.geometry().width() - 53,
+            self.settings_button.pos().y())
+        )
+        self.anim_settings.setDuration(1)
+        self.anim_settings.setEasingCurve(QtCore.QEasingCurve.Linear)
+        self.anim_settings.start()
+
+        # label animation
+        self.anim_label.setStartValue(self.label.pos())
+        self.anim_label.setEndValue(QtCore.QPoint(
+            (self.geometry().width() - 150) // 2,
+            self.label.pos().y())
+        )
+        self.anim_label.setDuration(1)
+        self.anim_label.setEasingCurve(QtCore.QEasingCurve.Linear)
+        self.anim_label.start()
+
+        # search string animation
+        self.anim_url.setStartValue(self.url.pos())
+        self.anim_url.setEndValue(QtCore.QPoint(
+            (self.geometry().width() - 660) // 2 - 20,
+            self.url.pos().y()
+        ))
+        self.anim_url.setDuration(1)
+        self.anim_url.setEasingCurve(QtCore.QEasingCurve.Linear)
+        self.anim_url.start()
+
+        # search button animation
+        self.anim_search.setStartValue(self.search.pos())
+        self.anim_search.setEndValue(QtCore.QPoint(
+            self.url.pos().x() + self.url.size().width() + 5,
+            self.search.pos().y())
+        )
+        self.anim_search.setDuration(1)
+        self.anim_search.setEasingCurve(QtCore.QEasingCurve.Linear)
+        self.anim_search.start()
+
 
 if __name__ == '__main__':
     app = QApplication()
