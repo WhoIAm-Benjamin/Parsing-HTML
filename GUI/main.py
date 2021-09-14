@@ -1,7 +1,6 @@
 import requests
 import design
 from sys import exit as e
-# import keyboard as kb
 from PySide2.QtWidgets import (QMainWindow,
                                QLineEdit,
                                QApplication,
@@ -10,9 +9,14 @@ from PySide2.QtWidgets import (QMainWindow,
                                QGraphicsView)
 from PySide2 import QtWebEngineWidgets as WebEngine
 from PySide2 import QtGui, QtCore
+from threading import Thread as Th
+from time import sleep as sl
+import keyboard
 
 class MainWindow(QMainWindow, design.Ui_MainWindow):
-    tabs = 1
+    tabs = {}
+    ID = 0
+    x_last = 53
 
     width = 0
     height = 0
@@ -21,9 +25,6 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
 
         super().__init__()
         self.setupUi(self)
-
-        self.width = self.geometry().width()
-        self.height = self.geometry().height()
 
         # noinspection PyArgumentList
         self.setGeometry(QtCore.QRect((QApplication.desktop().width() - self.geometry().width()) / 2, 40, self.geometry().width(), self.geometry().height()))
@@ -83,26 +84,25 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
         # noinspection PyUnresolvedReferences
         self.search.clicked.connect(self.searcher)
         self.settings_button.clicked.connect(self.settings)
+        self.addTab.clicked.connect(self.new_tab)
 
         # ANIMATIONS
         self.anim_label = QtCore.QPropertyAnimation(self.label, b'pos')
         self.anim_settings = QtCore.QPropertyAnimation(self.settings_button, b'pos')
-        self.anim_hLW = QtCore.QPropertyAnimation(self.horizontalLayoutWidget, b'size')
-        self.anim_url = QtCore.QPropertyAnimation(self.url, b'pos')
-        self.anim_search = QtCore.QPropertyAnimation(self.search, b'pos')
 
-        self.show()
+        keyboard.on_press(lambda i: self.on_press(e))
+
+        self.new_tab()
 
     def searcher(self):
         valid = ['http:', 'https:'] # допустимые значения в адресе
-        url = self.url.toPlainText() # получение URL из строки ввода
+        url = self.url.text() # получение URL из строки ввода
         # проверка адреса на валидность
         for i in valid:
             if i in url:
                 break
             elif i == 'https:':
                 url = 'http://' + url
-
 
         we = WebEngine.QWebEngineView()
         we.load(url)
@@ -131,26 +131,94 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
         self.address.show()
         self.view.show()
 
+    # noinspection PyAttributeOutsideInit
     def new_tab(self):
-        pass
+        tab = QLabel(self.centralwidget)
+        if self.tabs.__len__() == 0:
+            tab.setText('Welcome!')
+        else:
+            tab.setText('')
+        tab.setStyleSheet('border: 1px solid #289591; border-top-right-radius: 30')
+        font = QtGui.QFont()
+        font.setFamily('Cambria')
+        font.setPointSize(15)
+        tab.setFont(font)
+
+        # кнопка закрытия вкладки
+        # noinspection PyArgumentList,PyAttributeOutsideInit
+        self.btn_cls_tab = QPushButton(self.centralwidget)
+        # noinspection PyArgumentList
+        self.btn_cls_tab.setGeometry(QtCore.QRect(self.x_last + 93, 24, 18, 18))
+        self.btn_cls_tab.setStyleSheet(
+        'border-radius: 9px;\n'
+        'border: 1px solid #000;\n'
+        'image: url(:/btnClsTab/btnClsTab.png);\n'
+        )
+        self.btn_cls_tab.hide()
+
+        # анимация новых вкладок
+        # позиция вкладки
+        # self.tabs_anim_pos = QtCore.QPropertyAnimation(tab, b'pos')
+        # # noinspection PyArgumentList
+        # self.tabs_anim_pos.setStartValue(QtCore.QPoint(53, 14))
+        # # noinspection PyArgumentList
+        # self.tabs_anim_pos.setEndValue(QtCore.QPoint(self.x_last, 14))
+        # self.tabs_anim_pos.setDuration(800)
+        # self.tabs_anim_pos.setEasingCurve(QtCore.QEasingCurve.InOutQuad)
+
+        tab.setGeometry(QtCore.QRect(self.x_last, 14, 0, 0))
+
+        # размер вкладки
+        self.tabs_anim_size = QtCore.QPropertyAnimation(tab, b'size')
+        # noinspection PyArgumentList
+        self.tabs_anim_size.setStartValue(QtCore.QSize(2, 33))
+        # noinspection PyArgumentList
+        self.tabs_anim_size.setEndValue(QtCore.QSize(120, 33))
+        self.tabs_anim_size.setDuration(800)
+        self.tabs_anim_size.setEasingCurve(QtCore.QEasingCurve.InOutQuad)
+
+        # позиция кнопки новой вкладки
+        self.addTab_anim = QtCore.QPropertyAnimation(self.addTab, b'pos')
+        self.addTab_anim.setStartValue(self.addTab.pos())
+        # noinspection PyArgumentList
+        self.addTab_anim.setEndValue(QtCore.QPoint(
+            self.x_last + 123,
+            self.addTab.pos().y())
+        )
+        self.addTab_anim.setDuration(800)
+        self.addTab_anim.setEasingCurve(QtCore.QEasingCurve.InOutQuad)
+
+        # self.tabs_anim_pos.start()
+        self.tabs_anim_size.start()
+        self.addTab_anim.start()
+
+        # укоротим текст, если он длиннее, чем нужно
+        if tab.text().__len__() > 8:
+            tab.setText(self.tab.text()[:6])
+
+        def btn():
+            sl(2)
+            self.btn_cls_tab.show()
+
+        th = Th(target = btn, args = ())
+        th.start()
+
+        # добавим новую вкладку в список вкладок
+        self.tabs[self.ID] = (tab, self.btn_cls_tab)
+
+        self.count.setText(str(self.tabs.__len__()))
+
+        self.show()
+
+        self.x_last += 120
+
+        del th
 
     def settings(self):
         pass
 
+    # noinspection PyArgumentList
     def resizeEvent(self, event):
-        # horizontal layout widget animation
-        height = self.horizontalLayoutWidget.geometry().height()
-        self.anim_hLW.setStartValue(QtCore.QSize(
-            self.horizontalLayoutWidget.geometry().width(),     # width
-            height)    # height
-        )
-        self.anim_hLW.setEndValue(QtCore.QSize(
-            self.geometry().width() - 103,                      # new width
-            height)    # height
-        )
-        self.anim_hLW.setDuration(1)
-        self.anim_hLW.setEasingCurve(QtCore.QEasingCurve.Linear)
-        self.anim_hLW.start()
 
         # settings button animation
         self.anim_settings.setStartValue(self.settings_button.pos())
@@ -158,7 +226,7 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
             self.geometry().width() - 53,
             self.settings_button.pos().y())
         )
-        self.anim_settings.setDuration(1)
+        self.anim_settings.setDuration(0.1)
         self.anim_settings.setEasingCurve(QtCore.QEasingCurve.Linear)
         self.anim_settings.start()
 
@@ -168,29 +236,34 @@ class MainWindow(QMainWindow, design.Ui_MainWindow):
             (self.geometry().width() - 150) // 2,
             self.label.pos().y())
         )
-        self.anim_label.setDuration(1)
+        self.anim_label.setDuration(0.1)
         self.anim_label.setEasingCurve(QtCore.QEasingCurve.Linear)
         self.anim_label.start()
 
-        # search string animation
-        self.anim_url.setStartValue(self.url.pos())
-        self.anim_url.setEndValue(QtCore.QPoint(
-            (self.geometry().width() - 660) // 2 - 20,
-            self.url.pos().y()
-        ))
-        self.anim_url.setDuration(1)
-        self.anim_url.setEasingCurve(QtCore.QEasingCurve.Linear)
-        self.anim_url.start()
-
-        # search button animation
-        self.anim_search.setStartValue(self.search.pos())
-        self.anim_search.setEndValue(QtCore.QPoint(
-            self.url.pos().x() + self.url.size().width() + 5,
-            self.search.pos().y())
+        # search string move
+        self.url.setGeometry(
+            QtCore.QRect(
+                (self.geometry().width() - 660) // 2 - 20,
+                self.url.pos().y(),
+                self.url.geometry().width(),
+                self.url.geometry().height()
+            )
         )
-        self.anim_search.setDuration(1)
-        self.anim_search.setEasingCurve(QtCore.QEasingCurve.Linear)
-        self.anim_search.start()
+
+        # search button move
+        self.search.setGeometry(
+            QtCore.QRect(
+                self.url.pos().x() + self.url.geometry().width() + 5,
+                self.search.pos().y(),
+                self.search.size().width(),
+                self.search.size().height()
+            )
+        )
+
+    # noinspection PyUnusedLocal
+    def on_press(self, event):
+        if keyboard.is_pressed('enter'):
+            self.searcher()
 
 
 if __name__ == '__main__':

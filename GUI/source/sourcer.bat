@@ -1,3 +1,4 @@
 @echo off
-pyrcc5 search.qrc -o "../search_rc.py"
+pyrcc5 source.qrc -o "../source_rc.py"
+echo "source_rc.py" built successfull 
 set/p "=>"

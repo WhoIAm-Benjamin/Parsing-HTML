@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="settings">
+    <file>settings.png</file>
+  </qresource>
+  <qresource prefix="addTab">
+    <file>addTab.png</file>
+  </qresource>
+  <qresource prefix="search">
+    <file>src.png</file>
+  </qresource>
+  <qresource prefix="btnClsTab">
+    <file>btnClsTab.png</file>
+  </qresource>
+</RCC>

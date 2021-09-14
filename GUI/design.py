@@ -20,13 +20,6 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("background-color: rgb(235, 255, 252);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(50, 0, 921, 51))
-        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayout.setContentsMargins(0, 3, 0, 0)
-        self.horizontalLayout.setSpacing(1)
-        self.horizontalLayout.setObjectName("horizontalLayout")
         self.count = QtWidgets.QLabel(self.centralwidget)
         self.count.setGeometry(QtCore.QRect(0, 0, 50, 50))
         font = QtGui.QFont()
@@ -34,7 +27,7 @@ class Ui_MainWindow(object):
         font.setPointSize(20)
         self.count.setFont(font)
         self.count.setStyleSheet("border-radius: 25px;\n"
-"border: 1px solid rgb(161, 194, 194);")
+"border: 1px solid #289591;")
         self.count.setText("")
         self.count.setAlignment(QtCore.Qt.AlignCenter)
         self.count.setObjectName("count")
@@ -50,6 +43,13 @@ class Ui_MainWindow(object):
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
+        self.addTab = QtWidgets.QPushButton(self.centralwidget)
+        self.addTab.setGeometry(QtCore.QRect(55, 14, 34, 34))
+        self.addTab.setStyleSheet("border-radius: 17px;\n"
+"border: 1 px solid #000;\n"
+"image: url(:/addTab/addTab.png);")
+        self.addTab.setText("")
+        self.addTab.setObjectName("addTab")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -58,4 +58,4 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Parsing HTML"))
-import search_rc
+import source_rc
